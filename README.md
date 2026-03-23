@@ -5,9 +5,6 @@
 ## Problem Statement
 Driver drowsiness is a major road safety challenge in India, where long-distance travel, night driving, and fatigue contribute to preventable accidents on highways and urban roads. DrowseGuard addresses this issue with a real-time computer vision system that monitors eye closure and mouth opening patterns from a live webcam feed, detects drowsiness risk early, and provides immediate alerts to improve driver awareness and reduce crash probability.
 
-## Demo
-Add screenshot here
-
 ## Features
 - Real-time EAR and MAR computation using MediaPipe facial landmarks
 - Dual classifier inference with KNN and Gaussian Naive Bayes ensemble
