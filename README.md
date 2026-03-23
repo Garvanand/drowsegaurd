@@ -3,46 +3,14 @@
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue) ![OpenCV 4.9](https://img.shields.io/badge/OpenCV-4.9-green)
 
 ## Problem Statement
-Drowsy driving remains a serious road safety risk in India, and studies show fatigue-related inattention is a recurring factor in highway and long-haul crash outcomes highlighted in NCRB-aligned road safety discussions. DrowseGuard v2 focuses on early fatigue detection with adaptive, personalized computer vision signals so interventions can occur before microsleep events escalate.
+Driver drowsiness is a major road safety challenge in India, where long-distance travel, night driving, and fatigue contribute to preventable accidents on highways and urban roads. DrowseGuard addresses this issue with a real-time computer vision system that monitors eye closure and mouth opening patterns from a live webcam feed, detects drowsiness risk early, and provides immediate alerts to improve driver awareness and reduce crash probability.
 
-## What's New In v2
-- PERCLOS-based temporal drowsiness measurement
-- Adaptive per-driver calibration for personalized EAR thresholding
-- 3D head pose estimation for nodding and drooping detection
-- PCA-compressed feature pipeline in the classifier
-- Three-tier alert escalation with warning and critical levels
-- Session-level CSV logging with critical-frame snapshots
-- Analytics dashboard for historical session review
-- Night-mode-aware preprocessing pipeline
-
-## Architecture
-```text
-drowseguard/
-├── main.py
-├── app.py
-├── preprocessor.py
-├── face_detector.py
-├── eye_analyzer.py
-├── feature_extractor.py
-├── classifier.py
-├── alert_system.py
-├── image_utils.py
-├── config.py
-├── perclos_engine.py
-├── head_pose.py
-├── fatigue_scorer.py
-├── calibrator.py
-├── session_logger.py
-├── analytics_page.py
-├── requirements.txt
-└── README.md
-```
-
-## How It Works
-1. Calibration: the system captures a 30-second baseline EAR profile and computes an adaptive threshold.
-2. Detection Loop: each frame is preprocessed, landmarks are extracted, EAR and MAR are computed, PERCLOS is updated, and head pose is estimated.
-3. Fatigue Scoring: a weighted composite score fuses PERCLOS, EAR deviation, blink behavior, yawn behavior, and head pitch.
-4. Alerting: the alert engine escalates between normal, warning, and critical states with audio signaling and event logging.
+## Features
+- Real-time EAR and MAR computation using MediaPipe facial landmarks
+- Dual classifier inference with KNN and Gaussian Naive Bayes ensemble
+- Audio alert subsystem with file-based alarm and generated fallback beep
+- Multi-stage preprocessing pipeline visualization for interpretability
+- Interactive Streamlit dashboard with live metrics and controls
 
 ## Course Module Coverage
 | Module name | Specific functions |
