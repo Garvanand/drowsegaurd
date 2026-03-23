@@ -1,3 +1,6 @@
+import collections
+import time
+
 import numpy as np
 from scipy.spatial import distance as dist
 
@@ -47,8 +50,17 @@ class EyeStateTracker:
         self.yawn_counter = 0
         self.yawning = False
         self.open_frame_counter = 0
+        self.ear_history = collections.deque(maxlen=60)
+        self.blink_timestamps = collections.deque(maxlen=100)
+        self.yawn_timestamps = collections.deque(maxlen=100)
+        self.last_blink_ear = None
+        self.last_blink_time = None
+        self.blink_velocity = 0.0
 
     def update(self, ear, mar):
+        now = time.time()
+        self.ear_history.append(float(ear))
+
         if is_eye_closed(ear):
             self.closed_frame_counter += 1
             self.open_frame_counter = 0
@@ -57,6 +69,12 @@ class EyeStateTracker:
         else:
             if self.closed_frame_counter > 0:
                 self.blink_count += 1
+                self.blink_timestamps.append(now)
+                if self.last_blink_ear is not None and self.last_blink_time is not None:
+                    dt = max(now - self.last_blink_time, 1e-6)
+                    self.blink_velocity = float((ear - self.last_blink_ear) / dt)
+                self.last_blink_ear = float(ear)
+                self.last_blink_time = now
             self.closed_frame_counter = 0
             self.open_frame_counter += 1
             if self.open_frame_counter >= 10:
@@ -64,10 +82,36 @@ class EyeStateTracker:
 
         if is_mouth_open(mar):
             self.yawn_counter += 1
-            if self.yawn_counter >= config.MAR_CONSEC_FRAMES:
+            if self.yawn_counter >= config.MAR_CONSEC_FRAMES and not self.yawning:
                 self.yawning = True
+                self.yawn_timestamps.append(now)
         else:
             self.yawn_counter = 0
             self.yawning = False
 
         return self.drowsy
+
+    def get_blink_rate_per_min(self):
+        now = time.time()
+        cutoff = now - 60.0
+        recent = [t for t in self.blink_timestamps if t >= cutoff]
+        self.blink_timestamps = collections.deque(recent, maxlen=100)
+        return float(len(recent))
+
+    def get_yawn_rate_per_min(self):
+        now = time.time()
+        cutoff = now - 60.0
+        recent = [t for t in self.yawn_timestamps if t >= cutoff]
+        self.yawn_timestamps = collections.deque(recent, maxlen=100)
+        return float(len(recent))
+
+    def get_ear_trend(self):
+        if len(self.ear_history) < 30:
+            return 0.0
+        values = list(self.ear_history)
+        return float(np.mean(values[-15:]) - np.mean(values[-30:-15]))
+
+    def get_ear_30s_mean(self):
+        if not self.ear_history:
+            return 0.0
+        return float(np.mean(self.ear_history))

@@ -29,11 +29,23 @@ def apply_histogram_equalization(gray_frame):
     return cv2.equalizeHist(gray_frame)
 
 
+def detect_night_mode(frame):
+    gray = bgr_to_gray(frame)
+    mean_brightness = cv2.mean(gray)[0]
+    return mean_brightness < config.NIGHT_MODE_BRIGHTNESS_THRESHOLD
+
+
 def preprocess_frame(frame):
     gray = bgr_to_gray(frame)
-    blurred = apply_gaussian_blur(gray)
-    enhanced = apply_clahe(blurred)
-    return enhanced, frame
+    is_night_mode = detect_night_mode(frame)
+    if is_night_mode:
+        blurred = cv2.GaussianBlur(gray, (7, 7), 0)
+        enhanced = apply_clahe(blurred)
+        enhanced = apply_clahe(enhanced)
+    else:
+        blurred = apply_gaussian_blur(gray)
+        enhanced = apply_clahe(blurred)
+    return enhanced, is_night_mode
 
 
 def extract_eye_region(gray_frame, landmarks, eye_indices, padding=5):

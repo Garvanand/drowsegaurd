@@ -7,15 +7,28 @@ import config
 
 class FaceDetector:
     def __init__(self):
-        self.mp_face_mesh = mp.solutions.face_mesh
-        self.face_mesh = self.mp_face_mesh.FaceMesh(
-            max_num_faces=1,
-            refine_landmarks=True,
-            min_detection_confidence=0.5,
-            min_tracking_confidence=0.5,
-        )
+        self.mp_face_mesh = None
+        self.face_mesh = None
+        if hasattr(mp, "solutions") and hasattr(mp.solutions, "face_mesh"):
+            self.mp_face_mesh = mp.solutions.face_mesh
+        else:
+            try:
+                from mediapipe.python.solutions import face_mesh
+
+                self.mp_face_mesh = face_mesh
+            except Exception:
+                self.mp_face_mesh = None
+        if self.mp_face_mesh is not None:
+            self.face_mesh = self.mp_face_mesh.FaceMesh(
+                max_num_faces=1,
+                refine_landmarks=True,
+                min_detection_confidence=0.5,
+                min_tracking_confidence=0.5,
+            )
 
     def detect(self, frame):
+        if self.face_mesh is None:
+            return None
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = self.face_mesh.process(rgb)
         if results.multi_face_landmarks:
@@ -59,4 +72,5 @@ class FaceDetector:
         return roi, (x1, y1, x2 - x1, y2 - y1)
 
     def close(self):
-        self.face_mesh.close()
+        if self.face_mesh is not None:
+            self.face_mesh.close()
